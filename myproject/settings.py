@@ -76,11 +76,16 @@ WSGI_APPLICATION = "myproject.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # Должно быть 'django.db.backends.postgresql'
+        'NAME': 'mydatabase',  # Имя вашей базы данных PostgreSQL
+        'USER': 'postgres',      # Имя пользователя PostgreSQL
+        'PASSWORD': 'skypro',  # Пароль пользователя PostgreSQL
+        'HOST': 'localhost',   # Хост, на котором работает PostgreSQL (обычно 'localhost' для локальной установки)
+        'PORT': '5432',        # Порт PostgreSQL (по умолчанию '5432')
     }
 }
+
 
 
 # Password validation
@@ -122,6 +127,9 @@ STATIC_URL = "static/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
-STATICFILES_DIRS = (BASE_DIR / "static",)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
