@@ -1,18 +1,21 @@
+from django.views import View
+from django.views.generic import TemplateView
 from django.shortcuts import render, get_object_or_404
-from .models import Product  # Импорт модели Product из текущего приложения
+from .models import Product
 
-def home(request):
-    products = Product.objects.all()
-    context = {'products': products}
-    return render(request, 'home.html', context)
+class HomeView(View):
+    def get(self, request):
+        products = Product.objects.all()
+        context = {
+            'products': products,
+        }
+        return render(request, 'home.html', context)
 
-def contact_page(request):
-    return render(request, 'contacts.html')
+class ContactView(TemplateView):
+    template_name = 'contacts.html'
 
-
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    context = {'product': product}
-    return render(request, 'product_detail.html', context)
-
-
+class ProductDetailView(View):
+    def get(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        context = {'product': product}
+        return render(request, 'product_detail.html', context)

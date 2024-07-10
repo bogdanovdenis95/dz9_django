@@ -49,5 +49,3 @@ class Product(models.Model):
                 'can change category'
             )
         ]
-
-
