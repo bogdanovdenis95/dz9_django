@@ -1,0 +1,34 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+
+.product-card {
+    max-width: 400px; /* Максимальная ширина карточки товара */
+    margin: 0 auto;   /* Центрирование карточки по горизонтали */
+    padding: 20px;    /* Отступы вокруг карточки */
+    border: 1px solid #ddd; /* Рамка вокруг карточки (можно убрать, если не нужна) */
+    box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Тень карточки */
+}
+
+.product-card img {
+    max-width: 100%;  /* Изображение товара занимает максимально доступную ширину карточки */
+    height: auto;     /* Высота рассчитывается автоматически для сохранения пропорций */
+    display: block;   /* Убираем лишние отступы между изображением и карточкой */
+    margin: 0 auto;   /* Центрируем изображение внутри карточки */
+}
+
+</style>
+
+    <div class="card-body">
+        <div class="product-card">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            <h2>{{ product.name }}</h2>
+            <p>{{ product.description }}</p>
+            <p>Категория: {{ product.category }}</p>
+        </ul>
+        <button type="button" class="btn btn-lg btn-block btn-outline-primary">Купить</button>
+    </div>
+{% endblock %}

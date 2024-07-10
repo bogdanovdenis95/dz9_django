@@ -28,5 +28,6 @@ class Command(BaseCommand):
                     description=product['fields']['description'],
                     price=product['fields']['price'],
                     image=product['fields']['image'],
+                    manufactured_at=product['fields']['manufactured_at'],
                     category=Category.objects.get(id=product['fields']['category'])
                 )
