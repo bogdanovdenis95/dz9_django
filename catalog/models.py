@@ -1,6 +1,5 @@
 from django.db import models
 
-
 NULLABLE = {'null': True, 'blank': True}
 
 
@@ -24,8 +23,6 @@ class Product(models.Model):
     price = models.FloatField(verbose_name='цена')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='дата последнего изменения')
-
-    owner = models.ForeignKey('users.User', on_delete=models.SET_NULL, help_text='Укажите владельца', **NULLABLE)
 
     is_published = models.BooleanField(default=False, verbose_name='опубликовано')
 

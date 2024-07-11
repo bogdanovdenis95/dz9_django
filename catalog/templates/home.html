@@ -13,6 +13,12 @@
     }
 </style>
 
+<div class="row mb-4">
+    <div class="col text-center">
+        <a href="{% url 'blog:blog_list' %}" class="btn btn-lg btn-primary">Перейти к блогам</a>
+    </div>
+</div>
+
 <div class="row text-center">
     {% for product in products %}
     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
