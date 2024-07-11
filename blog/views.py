@@ -3,6 +3,7 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView, D
 from pytils.translit import slugify
 from blog.models import Article
 
+
 class ArticleCreateView(CreateView):
     model = Article
     fields = ('title', 'content', 'preview', 'created_at', 'published', 'number_views',)
@@ -18,19 +19,21 @@ class ArticleCreateView(CreateView):
         else:
             return self.form_invalid(form)
 
+
 class ArticleUpdateView(UpdateView):
     model = Article
     fields = ('title', 'content', 'preview', 'created_at', 'published', 'number_views',)
-    
+
     def form_valid(self, form):
         if form.is_valid():
             new_art = form.save(commit=False)
             new_art.slug = slugify(new_art.title)
             new_art.save()
         return super().form_valid(form)
-    
+
     def get_success_url(self):
         return reverse('blog:blog_detail', args=[self.object.slug])
+
 
 class ArticleListView(ListView):
     model = Article
@@ -39,6 +42,7 @@ class ArticleListView(ListView):
         queryset = super().get_queryset(*args, **kwargs)
         queryset = queryset.filter(published=True)
         return queryset
+
 
 class ArticleDetailView(DetailView):
     model = Article
@@ -50,6 +54,7 @@ class ArticleDetailView(DetailView):
         self.object.number_views += 1
         self.object.save()
         return self.object
+
 
 class ArticleDeleteView(DeleteView):
     model = Article
