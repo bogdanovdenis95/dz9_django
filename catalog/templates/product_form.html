@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    <form class="row" method="post" enctype="multipart/form-data">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    <!-- Форма для версии -->
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Форма для версии продукта</h3>
+                    {% csrf_token %}
+                    {{ version_form|crispy }}
+                    <input type="hidden" name="product_id" value="{{ view.object.pk }}">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

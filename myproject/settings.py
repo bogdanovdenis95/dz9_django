@@ -14,6 +14,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "widget_tweaks",
+    "crispy_forms",
     "users",
     "catalog",
     "blog",
@@ -47,12 +49,15 @@ TEMPLATES = [
     },
 ]
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
 WSGI_APPLICATION = "myproject.wsgi.application"
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydatabase',
+        'NAME': 'django',
         'USER': 'postgres',
         'PASSWORD': 'skypro',
         'HOST': 'localhost',

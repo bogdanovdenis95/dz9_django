@@ -24,10 +24,19 @@
 
     <div class="card-body">
         <div class="product-card">
-            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                {% else %}
+                    <p>Изображение отсутствует</p>
+                {% endif %}
             <h2>{{ product.name }}</h2>
             <p>{{ product.description }}</p>
             <p>Категория: {{ product.category }}</p>
+            {% if active_version %}
+            <p>Active Version: {{ active_version.version_number }} - {{ active_version.version_name }}</p>
+            {% else %}
+            <p>No active version found.</p>
+            {% endif %}
         </ul>
         <button type="button" class="btn btn-lg btn-block btn-outline-primary">Купить</button>
     </div>

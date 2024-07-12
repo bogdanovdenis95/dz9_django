@@ -46,3 +46,16 @@ class Product(models.Model):
                 'can change category'
             )
         ]
+
+class Version(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Продукт')
+    version_number = models.CharField(("Номер версии"), max_length=20)
+    version_name = models.CharField(("Название версии"), max_length=100)
+    is_current = models.BooleanField(("Активная версия"), default=False)
+
+    class Meta:
+        verbose_name = "Версия"
+        verbose_name_plural = "Версии"
+
+    def __str__(self):
+        return f"{self.product.name} - {self.version_number}"

@@ -4,18 +4,18 @@
 {% block content %}
 <style>
     .product-card {
-        height: 630px;  /* Фиксированная высота карточки */
+        height: 780px;
     }
 
     .product-img {
-        width: 100%;  /* Ширина изображения займет всю ширину родительского элемента */
-        height: auto;  /* Высота будет автоматически рассчитана для сохранения пропорций */
+        width: 100%;
+        height: auto;
     }
 </style>
 
 <div class="row mb-4">
     <div class="col text-center">
-        <a href="{% url 'blog:blog_list' %}" class="btn btn-lg btn-primary">Перейти к блогам</a>
+        <a href="{% url 'catalog:product_add' %}" class="btn btn-lg btn-success">Добавить товар</a>
     </div>
 </div>
 
@@ -27,12 +27,23 @@
                 <h4 class="my-0 font-weight-normal">{{ product.name }}</h4>
             </div>
             <div class="card-body">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img">
+                {% else %}
+                    <p>Изображение отсутствует</p>
+                {% endif %}
                 <h1 class="card-title pricing-card-title">${{ product.price }}</h1>
                 <ul class="list-unstyled mt-3 mb-4 text-start">
                     <li>{{ product.description|slice:":100" }}</li>
                 </ul>
-                <a href="{% url 'catalog:product_detail' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-primary">Подробнее</a>
+                {% for key, active_version in active_versions.items %}
+                    {% if key == product.id %}
+                        <p>Active Version: {{ active_version.version_number }} - {{ active_version.version_name }}</p>
+                    {% endif %}
+                {% endfor %}
+                <a href="{% url 'catalog:product_detail' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-primary mb-2">Подробнее</a>
+                <a href="{% url 'catalog:product_edit' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-warning mb-2 mr-2">Редактировать</a>
+                <a href="{% url 'catalog:product_delete' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-danger mb-2">Удалить</a>
             </div>
         </div>
     </div>

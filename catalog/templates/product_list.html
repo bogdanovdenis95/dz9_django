@@ -1,0 +1,13 @@
+<!-- Ваш шаблон product_list.html -->
+
+{% for product in products %}
+    <h2>{{ product.name }}</h2>
+    <p>{{ product.description }}</p>
+    
+    <!-- Проверяем, есть ли активная версия для данного продукта -->
+    {% if product.id in active_versions %}
+        <p>Активная версия: {{ active_versions[product.id].version_number }} - {{ active_versions[product.id].version_name }}</p>
+    {% else %}
+        <p>Активная версия не определена</p>
+    {% endif %}
+{% endfor %}

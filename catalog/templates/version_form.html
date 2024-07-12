@@ -1,0 +1,10 @@
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form|crispy }}
+    {% if form.instance.pk %}
+        {% if form.instance.delete_version %}
+            <p>Вы уверены, что хотите удалить версию с номером {{ form.instance.version_number }}?</p>
+        {% endif %}
+    {% endif %}
+    <button type="submit" class="btn btn-primary">Сохранить версию</button>
+</form>
