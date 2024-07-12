@@ -1,1 +1,0 @@
-# dz6_django
