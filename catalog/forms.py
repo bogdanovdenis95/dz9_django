@@ -27,29 +27,48 @@ class ProductForm(forms.ModelForm):
 
 class VersionForm(forms.ModelForm):
     delete_version = forms.BooleanField(required=False, label='Удалить версию')
-    
+
     class Meta:
         model = Version
-        fields = ['product', 'version_number', 'version_name', 'is_current', 'delete_version']
+        fields = ['version_number', 'version_name', 'is_current', 'delete_version']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Использование Crispy Forms для стилизации
+
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-sm-2 col-form-label'
         self.helper.field_class = 'col-sm-10'
         self.helper.layout = Layout(
             Row(
-                Column('product', css_class='form-group col-md-6 mb-0'),
                 Column('version_number', css_class='form-group col-md-6 mb-0'),
+                Column('version_name', css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
-            'version_name',
             'is_current',
+            'delete_version',
             Submit('submit', 'Save')
         )
 
-        # Стилизация булевого поля is_current
         self.fields['is_current'].widget.attrs.update({'class': 'form-check-input'})
+    
+    def save(self, commit=True, product=None):
+        version_number = self.cleaned_data['version_number']
+        if product:
+            try:
+                version = Version.objects.get(product=product, version_number=version_number)
+                version.version_name = self.cleaned_data['version_name']
+                version.is_current = self.cleaned_data['is_current']
+                if commit:
+                    version.save()
+                return version
+            except Version.DoesNotExist:
+                pass
+        
+        # Если продукт не передан или версия не найдена, создаем новую версию
+        instance = super().save(commit=False)
+        if product:
+            instance.product = product  # Устанавливаем связь с продуктом
+        if commit:
+            instance.save()
+        return instance

@@ -67,9 +67,19 @@ class ProductUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context['version_form'] = VersionForm(self.request.POST, instance=self.object)
+            context['version_form'] = VersionForm(self.request.POST)
         else:
-            context['version_form'] = VersionForm(instance=self.object)
+            product = self.get_object()
+            first_version = product.version_set.first()
+            if first_version:
+                initial_data = {
+                    'version_number': first_version.version_number,
+                    'version_name': first_version.version_name,
+                    'is_current': first_version.is_current,
+                }
+                context['version_form'] = VersionForm(initial=initial_data)
+            else:
+                context['version_form'] = VersionForm()
         return context
 
     def form_valid(self, form):
@@ -77,17 +87,15 @@ class ProductUpdateView(UpdateView):
         version_form = context['version_form']
         if version_form.is_valid():
             self.object = form.save()
-            version_data = version_form.cleaned_data
-            delete_version = version_data.pop('delete_version', False)
-            if delete_version:
-                version_number = version_data.get('version_number')
-                Version.objects.filter(product=self.object, version_number=version_number).delete()
+            if version_form.cleaned_data.get('delete_version'):
+                version = self.object.version_set.filter(version_number=version_form.cleaned_data['version_number']).first()
+                if version:
+                    version.delete()
             else:
-                version_data['product'] = self.object
-                Version.objects.update_or_create(product=self.object, version_number=version_data['version_number'], defaults=version_data)
+                version_form.save(commit=True, product=self.object)
             return super().form_valid(form)
         else:
-            return self.render_to_response(self.get_context_data(form=form))
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))

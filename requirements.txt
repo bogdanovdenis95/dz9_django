@@ -4,5 +4,6 @@ psycopg2-binary
 Pillow
 ipython
 pytils
-widget_tweaks
-crispy_forms
+django-widget-tweaks
+django-crispy-forms
+crispy-bootstrap4
