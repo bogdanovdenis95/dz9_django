@@ -3,11 +3,14 @@ from django.views import View
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from .models import Product, Version
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import HttpResponseForbidden
+from .models import Product, Version, Category
 from .forms import ProductForm, VersionForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import generic
-from .forms import SignUpForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 class HomeView(ListView):
     model = Product
@@ -32,6 +35,14 @@ class HomeView(ListView):
 
         # Добавляем словарь активных версий в контекст
         context['active_versions'] = active_versions
+        
+        # Добавляем информацию о праве редактирования и удаления
+        user = self.request.user
+        if user.is_authenticated:
+            context['can_edit_or_delete'] = user.groups.filter(name='Модераторы').exists()
+        else:
+            context['can_edit_or_delete'] = False
+
         return context
 
 
@@ -71,18 +82,25 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'product_form.html'
     success_url = reverse_lazy('catalog:home')
 
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.is_superuser and not request.user.groups.filter(name='Модераторы').exists():
+            if self.object.owner != request.user:
+                return HttpResponseForbidden("У вас нет прав доступа к редактированию этого продукта.")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
             context['version_form'] = VersionForm(self.request.POST)
         else:
             product = self.get_object()
-            first_version = product.version_set.first()
-            if first_version:
+            version = product.version_set.first()
+            if version:
                 initial_data = {
-                    'version_number': first_version.version_number,
-                    'version_name': first_version.version_name,
-                    'is_current': first_version.is_current,
+                    'version_number': version.version_number,
+                    'version_name': version.version_name,
+                    'is_current': version.is_current,
                 }
                 context['version_form'] = VersionForm(initial=initial_data)
             else:
@@ -94,8 +112,8 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         version_form = context['version_form']
         if version_form.is_valid():
             self.object = form.save()
-            if version_form.cleaned_data.get('delete_version'):
-                version = self.object.version_set.filter(version_number=version_form.cleaned_data['version_number']).first()
+            version = self.object.version_set.filter(version_number=version_form.cleaned_data['version_number']).first()
+            if version_form.cleaned_data['delete_version']:
                 if version:
                     version.delete()
             else:
@@ -112,6 +130,13 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = 'product_confirm_delete.html'
     success_url = reverse_lazy('catalog:home')
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if not request.user.is_superuser and not request.user.groups.filter(name='Модераторы').exists():
+            if self.object.owner != request.user:
+                return HttpResponseForbidden("У вас нет прав доступа к удалению этого продукта.")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class ProductListView(LoginRequiredMixin, ListView):
@@ -131,48 +156,61 @@ class ProductListView(LoginRequiredMixin, ListView):
         # Перебираем каждый продукт
         for product in products:
             # Находим активную версию для данного продукта
-            active_version = product.versions.filter(is_current=True).first()
+            active_version = product.version_set.filter(is_current=True).first()
             if active_version:
                 active_versions[product.id] = active_version
 
         # Добавляем словарь активных версий в контекст
         context['active_versions'] = active_versions
         return context
-    
-def version_form_view(request):
-    if request.method == 'POST':
-        form = VersionForm(request.POST)
-        if form.is_valid():
-            if form.cleaned_data['delete_version']:
-                # Удаление версии
-                version_number = form.cleaned_data['version_number']
-                Version.objects.filter(version_number=version_number).delete()
-            else:
-                form.save()
-            return redirect('success_url')  # Укажите URL для перенаправления после успешного сохранения
-    else:
-        form = VersionForm()
-    
-    return render(request, 'version_form.html', {'form': form})
 
-def product_form_view(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    
-    if request.method == 'POST':
-        form = VersionForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('catalog:product_detail', pk=product.pk)  # Перенаправление на детали продукта или другой URL
-    else:
-        form = VersionForm(initial={'product': product})
-    
-    context = {
-        'view': {'title': 'Редактирование товара'},
-        'version_form': form,
-    }
-    return render(request, 'product_form.html', context)
 
-class SignUpView(generic.CreateView):
-    form_class = SignUpForm
+@login_required
+def change_product_description(request, product_id):
+    if not request.user.has_perm('catalog.change_description'):
+        return HttpResponseForbidden("У вас нет разрешения на изменение описания продукта.")
+    
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == "POST":
+        new_description = request.POST.get('description')
+        product.description = new_description
+        product.save()
+        return redirect('catalog:product_detail', pk=product.id)
+
+    return render(request, 'catalog/change_product_description.html', {'product': product})
+
+
+@login_required
+def change_product_category(request, product_id):
+    if not request.user.has_perm('catalog.change_category'):
+        return HttpResponseForbidden("У вас нет разрешения на изменение категории продукта.")
+    
+    product = get_object_or_404(Product, id=product_id)
+    categories = Category.objects.all()
+    
+    if request.method == "POST":
+        new_category_id = request.POST.get('category')
+        new_category = get_object_or_404(Category, id=new_category_id)
+        product.category = new_category
+        product.save()
+        return redirect('catalog:product_detail', pk=product.id)
+
+    return render(request, 'catalog/change_product_category.html', {'product': product, 'categories': categories})
+
+
+@login_required
+def unpublish_product(request, product_id):
+    if not request.user.has_perm('catalog.off_published'):
+        return HttpResponseForbidden("У вас нет разрешения на отмену публикации продукта.")
+    
+    product = get_object_or_404(Product, id=product_id)
+    product.is_published = False
+    product.save()
+    return redirect('catalog:product_detail', pk=product.id)
+
+
+class SignUpView(CreateView):
+    form_class = UserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'registration/register.html'

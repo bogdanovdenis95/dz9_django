@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Изменить категорию продукта</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="category">Новая категория:</label>
+            <select id="category" name="category" class="form-control">
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Изменить категорию</button>
+    </form>
+</div>
+{% endblock %}

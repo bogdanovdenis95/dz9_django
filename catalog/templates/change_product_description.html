@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Изменить описание продукта</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="description">Новое описание:</label>
+            <textarea id="description" name="description" class="form-control">{{ product.description }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Изменить описание</button>
+    </form>
+</div>
+{% endblock %}

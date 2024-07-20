@@ -26,9 +26,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='дата последнего изменения')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
-
-
-
     is_published = models.BooleanField(default=False, verbose_name='опубликовано')
 
     def __str__(self):
@@ -38,18 +35,9 @@ class Product(models.Model):
         verbose_name = 'продукт'
         verbose_name_plural = 'продукты'
         permissions = [
-            (
-              'off_published',
-              'can remove published'
-            ),
-            (
-                'change_description',
-                'can change description'
-            ),
-            (
-                'change_category',
-                'can change category'
-            )
+            ('off_published', 'can remove published'),
+            ('change_description', 'can change description'),
+            ('change_category', 'can change category'),
         ]
 
 class Version(models.Model):

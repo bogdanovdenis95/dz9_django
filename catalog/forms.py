@@ -67,10 +67,9 @@ class VersionForm(forms.ModelForm):
             except Version.DoesNotExist:
                 pass
         
-        # Если продукт не передан или версия не найдена, создаем новую версию
         instance = super().save(commit=False)
         if product:
-            instance.product = product  # Устанавливаем связь с продуктом
+            instance.product = product
         if commit:
             instance.save()
         return instance

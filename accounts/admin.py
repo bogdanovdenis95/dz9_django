@@ -9,7 +9,7 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('avatar', 'phone_number', 'country')}),
-        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'groups', 'user_permissions')}),
     )
     add_fieldsets = (
         (None, {
@@ -20,5 +20,8 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ('email',)
     ordering = ('email',)
 
+# Регистрация кастомного администратора для CustomUser
 admin.site.register(CustomUser, CustomUserAdmin)
+
+# Регистрация модели UserProfile
 admin.site.register(UserProfile)

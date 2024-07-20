@@ -1,3 +1,4 @@
+<!-- home.html -->
 {% extends 'base.html' %}
 {% load media_filters %}
 
@@ -20,6 +21,9 @@
 </div>
 
 <div class="row text-center">
+    {% if user.is_authenticated and not can_edit_or_delete %}
+    {% endif %}
+    
     {% for product in products %}
     <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
         <div class="card product-card box-shadow">
@@ -42,8 +46,13 @@
                     {% endif %}
                 {% endfor %}
                 <a href="{% url 'catalog:product_detail' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-primary mb-2">Подробнее</a>
-                <a href="{% url 'catalog:product_edit' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-warning mb-2 mr-2">Редактировать</a>
-                <a href="{% url 'catalog:product_delete' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-danger mb-2">Удалить</a>
+                {% if can_edit_or_delete or product.owner == user %}
+                    <a href="{% url 'catalog:product_edit' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-warning mb-2 mr-2">Редактировать</a>
+                    <a href="{% url 'catalog:product_delete' pk=product.pk %}" class="btn btn-lg btn-block btn-outline-danger mb-2">Удалить</a>
+                {% else %}
+                    <span class="btn btn-lg btn-block btn-outline-warning mb-2 mr-2 disabled">Редактировать</span>
+                    <span class="btn btn-lg btn-block btn-outline-danger mb-2 disabled">Удалить</span>
+                {% endif %}
             </div>
         </div>
     </div>

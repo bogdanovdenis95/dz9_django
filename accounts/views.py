@@ -17,7 +17,7 @@ from .models import UserProfile
 class RegisterView(CreateView):
     form_class = CustomUserCreationForm
     template_name = 'registration/register.html'
-    success_url = reverse_lazy('accounts:login')
+    success_url = reverse_lazy('login')
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -29,7 +29,7 @@ class RegisterView(CreateView):
         # Создайте или получите профиль пользователя
         profile, created = UserProfile.objects.get_or_create(user=user)
         profile.email_verification_token = token
-        profile.save()
+        profile.save(update_fields=['email_verification_token'])
 
         # Формирование ссылки для подтверждения
         verification_link = self.request.build_absolute_uri(
@@ -65,7 +65,7 @@ class VerifyEmailView(View):
 class PasswordResetView(FormView):
     form_class = PasswordResetForm
     template_name = 'registration/password_reset.html'
-    success_url = reverse_lazy('accounts:login')
+    success_url = reverse_lazy('login')
 
     def form_valid(self, form):
         email = form.cleaned_data['email']
