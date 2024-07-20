@@ -5,6 +5,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from .models import Product, Version
 from .forms import ProductForm, VersionForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
+from .forms import SignUpForm
 
 class HomeView(ListView):
     model = Product
@@ -36,7 +39,7 @@ class ContactView(TemplateView):
     template_name = 'contacts.html'
 
 
-class ProductDetailView(DetailView):
+class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = 'product_detail.html'
 
@@ -51,14 +54,18 @@ class ProductDetailView(DetailView):
         return context
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     template_name = 'product_form.html'
     success_url = reverse_lazy('catalog:home')
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ProductUpdateView(UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
     template_name = 'product_form.html'
@@ -101,13 +108,13 @@ class ProductUpdateView(UpdateView):
         return self.render_to_response(self.get_context_data(form=form))
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     template_name = 'product_confirm_delete.html'
     success_url = reverse_lazy('catalog:home')
 
 
-class ProductListView(ListView):
+class ProductListView(LoginRequiredMixin, ListView):
     model = Product
     template_name = 'product_list.html'
     context_object_name = 'products'
@@ -164,3 +171,8 @@ def product_form_view(request, pk):
         'version_form': form,
     }
     return render(request, 'product_form.html', context)
+
+class SignUpView(generic.CreateView):
+    form_class = SignUpForm
+    success_url = reverse_lazy('login')
+    template_name = 'registration/register.html'

@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+
 
 NULLABLE = {'null': True, 'blank': True}
 
@@ -23,6 +25,9 @@ class Product(models.Model):
     price = models.FloatField(verbose_name='цена')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='дата последнего изменения')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False)
+
+
 
     is_published = models.BooleanField(default=False, verbose_name='опубликовано')
 
@@ -48,10 +53,11 @@ class Product(models.Model):
         ]
 
 class Version(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Продукт')
-    version_number = models.CharField(("Номер версии"), max_length=20)
-    version_name = models.CharField(("Название версии"), max_length=100)
-    is_current = models.BooleanField(("Активная версия"), default=False)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    version_number = models.CharField(max_length=100)
+    version_name = models.CharField(max_length=100)
+    is_current = models.BooleanField(default=False)
+    delete_version = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Версия"

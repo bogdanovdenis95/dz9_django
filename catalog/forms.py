@@ -3,6 +3,8 @@ from django import forms
 from .models import Product, Version
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -72,3 +74,10 @@ class VersionForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+    
+class SignUpForm(UserCreationForm):
+    email = forms.EmailField(max_length=254, required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
