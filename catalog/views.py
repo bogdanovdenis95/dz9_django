@@ -11,6 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from .services import get_categories
 
 class HomeView(ListView):
     model = Product
@@ -39,7 +42,7 @@ class HomeView(ListView):
         # Добавляем информацию о праве редактирования и удаления
         user = self.request.user
         if user.is_authenticated:
-            context['can_edit_or_delete'] = user.groups.filter(name='Модераторы').exists()
+            context['can_edit_or_delete'] = user.groups.filter(name='Moderator').exists()
         else:
             context['can_edit_or_delete'] = False
 
@@ -53,6 +56,10 @@ class ContactView(TemplateView):
 class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
     template_name = 'product_detail.html'
+
+    @method_decorator(cache_page(60 * 15))  # Кэширование на 15 минут
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -84,7 +91,7 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
 
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not request.user.is_superuser and not request.user.groups.filter(name='Модераторы').exists():
+        if not request.user.is_superuser and not request.user.groups.filter(name='Moderator').exists():
             if self.object.owner != request.user:
                 return HttpResponseForbidden("У вас нет прав доступа к редактированию этого продукта.")
         return super().dispatch(request, *args, **kwargs)
@@ -133,7 +140,7 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
-        if not request.user.is_superuser and not request.user.groups.filter(name='Модераторы').exists():
+        if not request.user.is_superuser and not request.user.groups.filter(name='Moderator').exists():
             if self.object.owner != request.user:
                 return HttpResponseForbidden("У вас нет прав доступа к удалению этого продукта.")
         return super().dispatch(request, *args, **kwargs)
@@ -214,3 +221,12 @@ class SignUpView(CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'registration/register.html'
+
+
+class CategoryListView(ListView):
+    template_name = 'category_list.html'
+    context_object_name = 'categories'
+
+    def get_queryset(self):
+        # Получаем категории через сервисную функцию с кешированием
+        return get_categories()

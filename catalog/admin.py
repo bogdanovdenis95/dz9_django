@@ -24,28 +24,28 @@ class ProductAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
-        if request.user.groups.filter(name='Модераторы').exists():
+        if request.user.groups.filter(name='Moderator').exists():
             return qs
         return qs.none()
 
     def has_change_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
-        if request.user.groups.filter(name='Модераторы').exists():
+        if request.user.groups.filter(name='Moderator').exists():
             return True
         return False
 
     def has_add_permission(self, request):
         if request.user.is_superuser:
             return True
-        if request.user.groups.filter(name='Модераторы').exists():
+        if request.user.groups.filter(name='Moderator').exists():
             return True
         return False
 
     def has_delete_permission(self, request, obj=None):
         if request.user.is_superuser:
             return True
-        if request.user.groups.filter(name='Модераторы').exists():
+        if request.user.groups.filter(name='Moderator').exists():
             return True
         return False
 

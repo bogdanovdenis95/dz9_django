@@ -3,7 +3,7 @@
         "model": "auth.group",
         "pk": 1,
         "fields": {
-            "name": "Модератор",
+            "name": "Moderator",
             "permissions": [33, 34, 35]
         }
     }
