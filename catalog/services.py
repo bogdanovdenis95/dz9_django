@@ -9,7 +9,7 @@ def get_categories():
         # Если данных нет в кеше, извлекаем из базы данных
         categories = list(Category.objects.all())
         # Сохраняем данные в кеш
-        cache.set('categories_list', categories, timeout=60*1)  # Кэшируем на 15 минут
+        cache.set('categories_list', categories, timeout=60*15)  # Кэшируем на 15 минут
 
     return categories
 
